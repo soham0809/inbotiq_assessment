@@ -16,7 +16,7 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://frontend-8johoaxjf-sohams-projects-ae1042bf.vercel.app'] 
+    ? ['https://frontend-jyzjgy9ct-sohams-projects-ae1042bf.vercel.app'] 
     : ['http://localhost:3000'],
   credentials: true
 }));
