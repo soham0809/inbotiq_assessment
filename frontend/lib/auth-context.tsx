@@ -43,9 +43,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signup = async (email: string, name: string, password: string, role: string) => {
-    const res = await api.post('/auth/signup', { email, name, password, role })
-    Cookies.set('token', res.data.token, { expires: 7 })
-    setUser(res.data.user)
+    console.log('Signup attempt:', { email, name, role })
+    try {
+      const res = await api.post('/auth/signup', { email, name, password, role })
+      console.log('Signup response:', res.data)
+      Cookies.set('token', res.data.token, { expires: 7 })
+      setUser(res.data.user)
+    } catch (error: any) {
+      console.error('Signup error:', error)
+      console.error('Error response:', error.response?.data)
+      throw error
+    }
   }
 
   const logout = () => {

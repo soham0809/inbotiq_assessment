@@ -28,6 +28,34 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+app.get('/test-db', async (req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    await prisma.$connect();
+    console.log('Database connection successful');
+    
+    const userCount = await prisma.user.count();
+    console.log('User count:', userCount);
+    
+    await prisma.$disconnect();
+    
+    res.json({ 
+      status: 'Database connected', 
+      userCount,
+      timestamp: new Date().toISOString() 
+    });
+  } catch (error) {
+    console.error('Database connection error:', error);
+    res.status(500).json({ 
+      status: 'Database connection failed', 
+      error: error.message,
+      timestamp: new Date().toISOString() 
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

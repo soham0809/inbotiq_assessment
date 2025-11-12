@@ -9,31 +9,38 @@ const prisma = new PrismaClient();
 
 router.post('/signup', async (req, res) => {
   try {
+    console.log('Signup request received:', req.body);
     const { email, name, password, role } = req.body;
 
     if (!email || !name || !password) {
+      console.log('Missing required fields');
       return res.status(400).json({ error: 'All fields are required' });
     }
 
+    console.log('Checking for existing user...');
     const existingUser = await prisma.user.findUnique({
       where: { email }
     });
 
     if (existingUser) {
+      console.log('User already exists');
       return res.status(400).json({ error: 'User already exists' });
     }
 
+    console.log('Hashing password...');
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    console.log('Creating user in database...');
     const user = await prisma.user.create({
       data: {
         email,
         name,
         password: hashedPassword,
-        role: role || 'USER'
+        role: role === 'ADMIN' ? 'ADMIN' : 'USER'
       }
     });
 
+    console.log('User created successfully:', user.id);
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -51,8 +58,13 @@ router.post('/signup', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Signup error details:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
