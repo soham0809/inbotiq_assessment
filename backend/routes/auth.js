@@ -5,11 +5,23 @@ const { PrismaClient } = require('@prisma/client');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
-const prisma = new PrismaClient();
+
+let prisma;
+try {
+  prisma = new PrismaClient();
+} catch (error) {
+  console.error('Failed to initialize Prisma client:', error);
+}
 
 router.post('/signup', async (req, res) => {
   try {
     console.log('Signup request received:', req.body);
+    
+    if (!prisma) {
+      console.error('Prisma client not initialized');
+      return res.status(500).json({ error: 'Database connection failed' });
+    }
+    
     const { email, name, password, role } = req.body;
 
     if (!email || !name || !password) {
